@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- package-name : com.springboard.mapper , ClassName : BoardMapper -->
+<mapper namespace="com.springboard.mapper.BoardMapper">
+
+	<!-- 아래 sql문을 실행해서 결과를 resultType에다가 넣으시오!@!@!@ -->
+	<select id="selectBoard" resultType="BoardVO">
+		select bno, title, writer, regdate, updatedate, deleted, readcount from tbl_board where deleted ='0' order by bno desc
+	</select>
+	
+	<!-- Sql : 재사용 할 수 있는 SQL 블럭 -->
+	<sql id="searchCondition">
+		<trim suffix="AND"> 
+		 	<choose>
+		 		<when test="searchType == 'T'.toString()">
+		 			title like '%'||#{searchKey}||'%'
+		 		</when>
+		 		<when test="searchType == 'C'.toString()">
+		 			content like '%'||#{searchKey}||'%'
+		 		</when>
+		 		<when test="searchType == 'TC'.toString()">
+		 			( title like '%'||#{searchKey}||'%' OR content like '%'||#{searchKey}||'%' )
+		 		</when>
+		 		<when test="searchType == 'W'.toString()">
+		 			writer like '%'||#{searchKey}||'%'
+		 		</when>
+		 	</choose>
+		 </trim>
+	</sql>
+	
+	<select id="selectBoardWithPaging" resultType="BoardVO" parameterType="hashmap">
+		
+		select bno, title, writer, regdate, updatedate, deleted, readcount from 
+		(
+			select rownum idx, bno, title, writer, regdate, updatedate, deleted, readcount 
+			from tbl_board 
+		 	where
+		 		<include refid="searchCondition" />
+		 		deleted ='0' and
+		 		<![CDATA[ rownum < #{ end } ]]> 
+			order by bno desc 
+		) 
+		where idx >= #{ beginning }
+		
+	</select>
+	
+	<select id="selectBoardCount" parameterType="hashmap" resultType="int">
+		select count(*) from tbl_board where <include refid="searchCondition" /> deleted ='0'
+	</select>
+	
+	<!-- <insert id="insertBoard" parameterType="com.springboard.vo.BoardVO">
+		<selectKey keyProperty="bno" resultType="int" order="AFTER">
+			select seq_board.currval from dual
+		</selectKey>	
+		insert into tbl_board (bno,title, writer, content) values (seq_board.nextval, #{title} , #{writer} , #{content} )
+	</insert> -->
+	
+	<insert id="insertBoard" parameterType="BoardVO"
+			useGeneratedKeys="true" keyColumn="bno" keyProperty="bno" >
+			<!-- keyColumn : 아래 테이블과 일치하는 컬럼명 , keyProperty : BoardVO에 들어갈 변수명 -->
+		insert into tbl_board (bno,title, writer, content) values (seq_board.nextval, #{title} , #{writer} , #{content} )
+	</insert>
+
+
+	<resultMap type="BoardVO" id="boardMap">
+		<result column="bno" property="bno" />
+		<result column="title" property="title" />
+		<result column="writer" property="writer" />
+		<result column="content" property="content" />
+		<result column="reddate" property="regDate" />
+		<result column="updatedate" property="updateDate" />
+		<result column="readcount" property="readCount" />
+		<collection property="replies" column="bno" resultMap="replyMap" />
+	</resultMap>
+	<resultMap type="ReplyVO" id="replyMap">
+		<result column="rno" property="rno" />
+		<result column="replyer" property="replyer" />
+		<result column="reply" property="reply" />
+		<result column="replydate" property="replyDate" />
+		<result column="updatedate" property="updateDate" />
+		<result column="gno" property="gno" />
+		<result column="sno" property="sno" />
+		<result column="depth" property="depth" />
+		<result column="deleted" property="deleted" />
+	</resultMap>
+	<select id="selectByBno" parameterType="int" resultMap="boardMap">
+		select 
+			b.bno, b.title, b.writer, b.content, b.regdate, b.updatedate, b.readcount ,
+			r.rno , r.replyer, r.reply, r.replydate, r.updatedate, r.gno, r.sno, r.depth, r.deleted
+		from tbl_board b
+		left outer join tbl_reply r
+		on b.bno = r.bno
+		where b.bno = #{ bno } and b.deleted = '0'
+		order by r.gno DESC , r.sno ASC
+	</select>
+
+	
+	<select id="selectByBno2" parameterType="int" resultType="BoardVO">
+		select bno, title, writer, content, regdate, updatedate, readcount from tbl_board where bno = #{ bno } and deleted = '0'
+	</select>
+	
+	<!-- <delete id="deleteBoard" parameterType="int">
+		delete tbl_board where bno = #{ bno }
+	</delete> -->
+	
+	<delete id="deleteBoard" parameterType="int">
+		update tbl_board set deleted = '1' where bno = #{ bno }
+	</delete>
+	
+	<update id="updateBoard" parameterType="BoardVO">
+		update tbl_board set title=#{ title } , content=#{content} , updatedate=sysdate where bno = #{bno}
+	</update>
+	
+	<update id="updateReadCount" parameterType="int">
+		update tbl_board set readcount = readcount+1 where bno = #{ bno }
+	</update>
+
+</mapper>

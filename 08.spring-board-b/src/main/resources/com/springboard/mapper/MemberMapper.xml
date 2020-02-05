@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+		   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.springboard.mapper.MemberMapper">
+
+	<insert id="insertMember" parameterType="MemberVO">
+		insert into tbl_member values ( #{ email } , #{ passwd } )
+	</insert>
+	
+	<select id="selectMemberByEmailAndPasswd" parameterType="MemberVO" resultType="MemberVO">
+		select email from tbl_member where email = #{ email } and passwd = #{ passwd }
+	</select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
