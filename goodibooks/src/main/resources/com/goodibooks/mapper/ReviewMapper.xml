@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+		   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.goodibooks.mapper.ReviewMapper">
+
+	<!-- 
+	<insert id="insertReview" parameterType="ReviewVO">
+		insert into review (re_no, rate, title, content, book_no, id ) 
+		values ( review_seq.nextval, #{ rate }, #{ title }, #{ content }, #{ book_no }, #{ id } )
+	</insert>
+	-->
+	
+	<select id="findReviewWithBookNo" parameterType="int" resultType="ReviewVO">
+		select * from review where book_no = #{ book_no } and deleted ='0' order by re_no DESC
+	</select>
+	
+	<!--  TEST  -->
+	<insert id="insertReview" parameterType="ReviewVO">
+		insert into review (re_no, rate, book_no, title, content, id ) 
+		values ( review_seq.nextval, #{ rate }, #{book_no}, #{ title }, #{ content }, #{ id } )
+	</insert>
+	
+	<update id="updateReview" parameterType="ReviewVO">
+		update review set rate=#{rate}, title=#{title}, content=#{content}, writedate=sysdate where re_no=#{re_no}
+	</update>
+	
+	<update id="deleteReview" parameterType="int">
+		delete from review where re_no=#{re_no}
+	</update>
+	
+	<select id="selectReivewCount" parameterType="int" resultType="int">
+		select count(*) from review where book_no = #{book_no} and deleted ='0'
+	</select>
+	
+	<select id="findReviewWithPaging" parameterType="hashmap" resultType="ReviewVO">
+		select re_no, rate, content, writedate, deleted, title, book_no, id from
+			(
+				select rownum idx, re_no, rate, content, writedate, deleted, title, book_no, id from review
+				where book_no=#{book_no} and deleted='0' and <![CDATA[ rownum < #{end} ]]>
+				order by re_no desc
+			)
+		where idx >= #{beginning}
+	</select>
+	
+	<select id="selectReviewCount" parameterType="int">
+		select count(*) from review where book_no = #{ book_no }
+	</select>
+	
+	<select id="selectReviewList" parameterType="String" resultType="ReviewVO">
+		select r.re_no, r.rate, r.title, r.content, r.writedate, r.id, r.book_no, b.name 
+		from review r , book_info b 
+		where r.book_no = b.book_no and r.id = #{ id } and r.deleted ='0'
+		order by r.writedate desc
+	</select>
+	
+</mapper>

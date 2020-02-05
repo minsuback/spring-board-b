@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+		   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.goodibooks.mapper.BookMapper">
+
+	<!-- 여러번 사용되는 쿼리 -->
+	<sql id="query">
+		select rownum idx, book_no, name, price, intro, writer, p.pub_name, c.category_name, contents
+		from book_info b, publisher p, category c 
+		where b.pub_no = p.pub_no and c.category_no = b.category_no and b.deleted = '0'
+	</sql>
+	<sql id="searchCondition">
+		<trim suffix=" like '%'||#{searchKey}||'%'">
+		<choose>
+			<when test="searchType == 'W'.toString()">
+				b.writer
+			</when>
+			<when test="searchType == 'C'.toString()">
+				category_name
+			</when>
+			<when test="searchType == 'P'.toString()">
+				pub_name
+			</when>
+		</choose>
+		</trim>
+	</sql>
+	
+	<!-- 책 상세 보기 -->
+	<select id="selectBookByBookNo" parameterType="int" resultType="BookInfoVO">
+		<include refid="query"></include> and
+		book_no = #{book_no}
+	</select>
+	<select id="selectImgByBookNo" parameterType="int" resultType="BookImgVO">
+		select img from book_img where book_no = #{book_no} order by img
+	</select>
+	<!-- 함께구매한책 : 같은 카테고리의 다른 책들 -->
+	<select id="selectDetailProducts" parameterType="BookInfoVO" resultType="BookInfoVO">
+		select b.book_no, b.price, b.name
+		from book_info b, category c
+		where b.book_no != #{book_no} and c.category_no = b.category_no and c.category_name like '${category_name}' and deleted = '0'
+	</select>
+
+	<!-- 전채첵 리스트 -->
+	<select id="selectBooks" parameterType="hashmap" resultType="BookInfoVO">
+		select * from (
+			<include refid="query"></include> order by book_no desc
+		) where <![CDATA[#{start} <= idx and idx < #{end}]]>
+	</select>
+	<!-- 페이징없는 전체책 리스트 (home 에서 사용할거) -->
+	<select id="selectBooksNoPaging" resultType="BookInfoVO">
+		<include refid="query"></include> and <![CDATA[rownum <= 10]]> order by book_no desc
+	</select>
+	
+	<!-- 전체 책 개수 -->
+	<select id="bookCount" resultType="int">
+		select count(*) from book_info where deleted = '0'
+	</select>
+	
+	<!-- 카테고리 리스트 -->
+	<select id="selectCategorys" resultType="CategoryVO">
+		select category_no, category_name from category
+	</select>
+	<!-- 카테고리별 책 개수 -->
+	<select id="bookCountByCategoryNo" parameterType="int" resultType="int">
+		select count(category_no) from book_info 
+		where category_no = #{categoryNo} and deleted = '0' group by category_no
+	</select>
+	
+	<!-- 책 검색 -->
+	<select id="searchBook" parameterType="hashmap" resultType="BookInfoVO" >
+		select * from (
+			<include refid="query"></include> and 
+			<include refid="searchCondition"></include> order by book_no desc
+		) where <![CDATA[#{start} <= idx and idx < #{end}]]>
+	</select>
+	
+	<!-- topbar 검색 -->
+	<select id="searchBookByKey" parameterType="hashmap" resultType="BookInfoVO">
+		select rownum, book_no, name, price, intro, writer from (
+			<include refid="query"></include>
+			and name like '%'||#{searchKey}||'%' or writer like '%'||#{searchKey}||'%' or pub_name like '%'||#{searchKey}||'%'
+		) where <![CDATA[#{start} <= rownum and rownum < #{end}]]>
+	</select>
+	
+</mapper>
+
+
+

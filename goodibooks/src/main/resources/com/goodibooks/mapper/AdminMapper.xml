@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+		   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.goodibooks.mapper.AdminMapper">
+
+	<select id="showMemberList" resultType="MemberVO">
+		SELECT id, name, phone, addr1, email, regDate FROM member WHERE deleted = '0'
+	</select>
+	
+	<insert id="insertBook" parameterType="BookInfoVO">
+		insert into book_info (book_no, name, price, intro, writer, pub_no, category_no, contents )
+		values ( book_seq.nextval, #{name}, #{price}, #{intro}, #{writer}, #{pub_no}, #{category_no}, #{contents} )
+	</insert>
+
+	<select id="selectCategory" resultType="CategoryVO">
+		select * from category order by category_no ASC
+	</select>
+	
+	<select id="selectPublisher" resultType="PublisherVO">
+		select * from publisher where deleted = '0' order by pub_no ASC 
+	</select>
+	
+	<insert id="insertBookImg" parameterType="BookImgVO">
+		insert into book_img (img_no, book_no, img) values (bookimg_seq.nextval, book_seq.currval, #{img} )
+	</insert>
+	
+	<insert id="insertPub" parameterType="PublisherVO">
+	 	insert into publisher (pub_no, pub_name) values (pub_seq.nextval, #{pub_name} )
+	</insert>
+	
+	<update id="deletePub" parameterType="int">
+		update publisher set deleted = '1' where pub_no = #{ pub_no } 
+	</update>
+	
+	<sql id="searchKeyContent">
+		<trim suffix="AND">
+			<choose>
+				<when test="searchKey">
+					pub_name like '%'||#{searchKey}||'%'
+				</when>
+			</choose>
+		</trim>
+	</sql>
+	
+	<select id="selectpubListWidthPaging" parameterType="hashmap" resultType="PublisherVO">
+		select pub_no, pub_name, deleted from
+			(
+				select rownum idx, pub_no, pub_name, deleted from publisher
+				where <include refid="searchKeyContent"/> 
+				deleted ='0' and <![CDATA[ rownum < #{ end } ]]> 
+				order by pub_no asc
+			)
+		where idx >= #{ beginning }
+	</select>
+	
+	<select id="selectPubCount" resultType="int">
+		select count(*) from publisher where deleted='0'
+	</select>
+	
+	<select id="selectBookInfoByBookNo" parameterType="int" resultType="BookInfoVO">
+		select * from book_info where book_no = #{book_no}
+	</select>
+	
+	<select id="selectBookImgByBookNo" parameterType="int" resultType="BookImgVO">
+		select * from book_img where book_no = #{book_no}
+	</select>
+	
+	<update id="updateBook" parameterType="BookInfoVO">
+		update book_info set category_no=#{category_no}, pub_no=#{pub_no}, name=#{name}, price=#{price}, writer=#{writer}, intro=#{intro}, contents=#{contents} 
+		where book_no=#{ book_no }
+	</update>
+	
+	<update id="updateBookImg" parameterType="BookImgVO">
+		insert into book_img (img_no, book_no, img) values (bookimg_seq.nextval, #{book_no}, #{img} )
+	</update>
+	
+	<delete id="deleteBookImg" parameterType="int">
+		delete from book_img where book_no = #{book_no}
+	</delete>
+	
+	<update id="deleteBook" parameterType="int">
+		update book_info set deleted ='1' where book_no = #{book_no}
+	</update>
+	
+	<!-- 이벤트 관련 -->
+	<insert id="insertEvent" parameterType="EventBoardVO">
+		insert into event_board (no, id, title, begindate, enddate, img, content) 
+		values (event_seq.nextval, #{id}, #{title}, #{beginDate}, #{endDate}, #{img}, #{content})
+	</insert>
+	
+	<select id="selectEventList" resultType="EventBoardVO">
+		select no, title, regdate, begindate, enddate, img, content, deleted, active
+		from event_board where deleted = '0'
+	</select>
+	
+	<select id="selectEventByNo" parameterType="int" resultType="EventBoardVO">
+		select no, title, regdate, begindate, enddate, img, content, deleted, active
+		from event_board where no = #{no}
+	</select>
+	
+	<update id="updateEventByNo" parameterType="EventBoardVO" >
+		update event_board set title = #{title}, begindate = #{beginDate}, enddate = #{endDate},
+		img = #{img}, content = #{content} where no = #{no}
+	</update>
+	
+	<update id="updateActiveByNo" parameterType="hashmap">
+		update event_board set active = #{active} where no = #{no}
+	</update>
+	
+	<delete id="deleteEventByNo" parameterType="int">
+		delete event_board where no = #{no}
+	</delete>
+
+</mapper>

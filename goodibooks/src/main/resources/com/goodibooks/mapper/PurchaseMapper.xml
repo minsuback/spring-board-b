@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+		   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.goodibooks.mapper.PurchaseMapper">
+
+	<insert id="orderInfoPlus" parameterType="String" >
+	  	INSERT INTO order_info (no, id)
+	  	VALUES (order_seq.nextval, #{id})
+	</insert>
+	
+	<update id="deleteOrder" parameterType="int">
+		UPDATE order_info
+		SET deleted = '1' 
+		WHERE no = #{ no }
+	</update>
+	
+	<insert id="insertOrder" parameterType="String">
+		insert into order_info (no, id ) values (order_seq.nextval, #{id} )
+	</insert>
+	
+	<insert id="insertOrderDeatil" parameterType="OrderDetailVO">
+		insert into order_detail (detail_no, detail_cnt, detail_price, no2, book_no) 
+		values (order_detail_seq.nextval, #{detail_cnt}, #{detail_price}, order_seq.currval, #{book_no})
+	</insert>
+	
+	<insert id="insertCartList" parameterType="CartListVO">
+		insert into order_detail (detail_no, book_no, no2, detail_cnt, detail_price) 
+		(
+			select order_detail_seq.nextval , book_no, order_seq.currval, cart_count, (cart_count * b.price)
+			from cartlist c , book_info b
+			where c.book_no = b.book_no and c.car_no = #{cart_no}
+		)
+	</insert>
+	
+	<!-- <insert id="insertCartList" parameterType="CartListVO">
+		insert into order_detail (detail_no, book_no, no2, detail_cnt, detail_price) values 
+		<foreach collection="list" item="cart" separator=" , ">
+		(
+			order_detail_seq.nextval, "${cart.book_no}" , order_seq.currval , "${cart.cart_count}" , ("${cart.cart_count}" * b.price)
+		) 
+		from cartlist , book_info b
+		where 
+		</foreach>
+		
+	</insert> -->
+	
+	<select id="selectCheckoutList" parameterType="String" resultType="OrderInfoVO">
+		select no, paydate, id, d.no2, d.book_no, d.detail_cnt, d.detail_price, b.name, ship_no
+		from order_info i, order_detail d , book_info b
+		where i.no = d.no2 and d.book_no = b.book_no and id = #{ id }
+		order by no desc
+	</select>
+	
+	<select id="selectDetailList" parameterType="int" resultType="OrderDetailVO">
+		select * from order_detail where 
+	</select>
+	
+	
+</mapper>

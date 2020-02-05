@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+		   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.goodibooks.mapper.MemberMapper">
+
+	<insert id="insertMember" parameterType="MemberVO">
+		insert into member ( id, passwd, name, phone, email, addr1, addr2, addr3 ) 
+		values ( #{ id }, #{ passwd }, #{ name }, #{ phone }, #{ email }, #{ addr1 }, #{ addr2 }, #{ addr3 } )
+	</insert>
+	
+	<!-- 멤버테이블 전체 조회로 변경 - ms -->
+	<select id="selectMemberByIdAndPasswd" parameterType="MemberVO" resultType="MemberVO">
+		select * from member where id = #{ id } and passwd = #{ passwd } and deleted = '0'
+	</select>
+	
+	<!-- id 중복체크 -->
+	<select id="selectMemberById" parameterType="String" resultType="MemberVO">
+		select * from member where id = #{id}
+	</select>
+	
+	
+	<update id="updateMember" parameterType="memberVO">
+		update member set passwd = #{passwd}, phone=#{ phone }, email=#{email}, addr1=#{addr1}, addr2=#{addr2}, addr3=#{addr3} where id=#{ id } 
+	</update>
+	
+	<update id="deleteMember" parameterType="MemberVO" >
+		update member 
+		set deleted = '1', deletedate = sysdate
+		where id=#{id}
+	</update>
+
+
+</mapper>

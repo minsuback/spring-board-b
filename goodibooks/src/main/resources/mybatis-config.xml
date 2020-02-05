@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE configuration
+	PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<!-- Alias -->
+	<typeAliases>
+		<typeAlias type="com.goodibooks.vo.MemberVO" alias="MemberVO" />
+		<typeAlias type="com.goodibooks.vo.BookInfoVO" alias="BookInfoVO"/>
+		<typeAlias type="com.goodibooks.vo.BookImgVO" alias="BookImgVO"/>
+		<typeAlias type="com.goodibooks.vo.CategoryVO" alias="CategoryVO"/>	
+		<typeAlias type="com.goodibooks.vo.BoardVO" alias="BoardVO" />
+		<typeAlias type="com.goodibooks.vo.QnAVO" alias="QnAVO" />
+		<typeAlias type="com.goodibooks.vo.AnswerVO" alias="AnswerVO" />
+		<typeAlias type="com.goodibooks.vo.ReviewVO" alias="ReviewVO" />
+		<typeAlias type="com.goodibooks.vo.CartListVO" alias="CartListVO" />
+		<typeAlias type="com.goodibooks.vo.OrderDetailVO" alias="OrderDetailVO" />
+		<typeAlias type="com.goodibooks.vo.OrderInfoVO" alias="OrderInfoVO" />
+		<typeAlias type="com.goodibooks.vo.PublisherVO" alias="PublisherVO"/>
+		<typeAlias type="com.goodibooks.vo.BookImgVO" alias="BookImgVO"/>
+		<typeAlias type="com.goodibooks.vo.EventBoardVO" alias="EventBoardVO"/>
+	</typeAliases>
+	
+	
+</configuration>

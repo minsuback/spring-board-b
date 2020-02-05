@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+		   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.goodibooks.mapper.AskMapper">
+	  
+	  <insert id="askWriteBoard" parameterType="QnAVO">
+	  	INSERT INTO qna (no, title, qnaType, content, id)
+	  	VALUES (qna_q_seq.nextval, #{title}, #{qnaType}, #{content}, #{id})
+	  </insert>
+	  
+	  <select id="selectQnaList" resultType="QnAVO">
+		SELECT no, qnaType, title, id, regDate, ans_check
+		FROM qna
+		WHERE deleted = '0'
+		ORDER BY no DESC
+	  </select>
+	  
+	  <select id="selectAskDetailByNo" parameterType="int" resultType="QnAVO">
+		SELECT no, qnaType, title, content, id, regdate, updatedate, ans_check
+		FROM qna
+		WHERE no = #{ no } AND deleted = '0'
+	  </select>
+	
+	  <update id="deleteAsk" parameterType="int">
+		UPDATE qna
+		SET deleted = '1' 
+		WHERE no = #{ no }
+	  </update>
+	  
+	  <select id="selectAskUpdateByNo" parameterType="int" resultType="QnAVO">
+		SELECT no, title, content, regdate, updatedate, ans_check
+		FROM qna
+		WHERE no = #{ no } AND deleted = '0'
+	  </select>
+	  
+	  <update id="updateAsk" parameterType="BoardVO">
+		UPDATE qna
+		SET title = #{ title }, content = #{ content }, updatedate = sysdate 
+		WHERE no = #{ no }
+	  </update>
+	  
+	  <select id="selectAskList" parameterType="String" resultType="QnaVO">
+	  	select * from qna where id = #{ id } and deleted ='0' order by regdate desc
+	  </select>
+	   
+</mapper>
